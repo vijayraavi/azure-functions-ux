@@ -8,6 +8,7 @@ import webConfigApi from './site/config/web/webConfigApiService';
 import siteApi from './site/siteApiService';
 import slotsApi from './site/slots/slotsApiService';
 import rbacHelper from '../utils/rbac-helper';
+import azureMountApi from './site/config/azureStorageAccounts/azureStorageAccountsApiService';
 const services = {
   siteApi,
   slotsApi,
@@ -19,5 +20,6 @@ const services = {
   stacksApi,
   billingMetersApi,
   rbacHelper,
+  azureMountApi,
 };
 export default services;

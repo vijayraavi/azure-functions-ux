@@ -27,6 +27,8 @@ import { translate, InjectedTranslateProps } from 'react-i18next';
 import LoadingComponent from '../../../components/loading/loading-component';
 import { AxiosError } from 'axios';
 import LogService from '../../../utils/LogService';
+import { fetchAzureStorageMountRequest } from '../../../modules/site/config/azureStorageAccounts/actions';
+import { AzureStorageMountState } from '../../../modules/site/config/azureStorageAccounts/reducer';
 export interface AppSettingsDataLoaderProps {
   children: (
     props: {
@@ -42,6 +44,7 @@ export interface AppSettingsDataLoaderProps {
   fetchConfig: () => void;
   fetchMetadata: () => void;
   fetchSlotConfigNames: () => void;
+  fetchAzureStorageMounts: () => void;
   fetchConnectionStrings: () => void;
   fetchPermissions: (resources: PermissionCheckObj[]) => void;
   fetchReadonly: (resources: ReadonlyCheckObj[]) => void;
@@ -52,6 +55,7 @@ export interface AppSettingsDataLoaderProps {
   site: SiteState;
   config: ConfigStateType;
   appSettings: AppSettingsState;
+  azureStorageMounts: AzureStorageMountState;
   connectionStrings: ConnectionStringState;
   metadata: MetadataState;
   slotConfigNames: SlotConfigNamesState;
@@ -127,6 +131,8 @@ const AppSettingsDataLoader: React.SFC<AppSettingsDataLoaderProps & InjectedTran
     updateSlotConfig,
     productionWritePermission,
     fetchReadonly,
+    fetchAzureStorageMounts,
+    azureStorageMounts,
     t,
   } = props;
 
@@ -157,11 +163,20 @@ const AppSettingsDataLoader: React.SFC<AppSettingsDataLoaderProps & InjectedTran
           os = 'Linux';
         }
         fetchStacks(os);
+        if (kind.includes('container') || kind.includes('linux')) {
+          fetchAzureStorageMounts();
+        }
       }
     },
     [props.site.data.kind]
   );
 
+  useEffect(
+    () => {
+      setBaseValues(convertStateToForm(props));
+    },
+    [azureStorageMounts]
+  );
   useEffect(
     () => {
       if (!loadingOrUpdating) {
@@ -212,6 +227,7 @@ const AppSettingsDataLoader: React.SFC<AppSettingsDataLoaderProps & InjectedTran
     setLoggedStop(true);
   }
 
+  console.log(baseValues);
   return <>{props.children({ onSubmit, initialFormValues: baseValues, saving: isUpdating(props), loading: isLoading(props) })}</>;
 };
 
@@ -239,6 +255,7 @@ const mapStateToProps = (state: RootState) => {
     slotConfigNames: state.slotConfigNames,
     permissionsWaiting: state.rbac.permissionCalled,
     readonlyWaiting: state.rbac.readonlyLockCalled,
+    azureStorageMounts: state.azureStorageMount,
   };
 };
 
@@ -257,6 +274,7 @@ const mapDispatchToProps = (dispatch: Dispatch<RootAction>) =>
       updateConfig: updateWebConfigRequest,
       updateSlotConfig: updateSlotConfigRequest,
       fetchReadonly: fetchReadonlyLocks,
+      fetchAzureStorageMounts: fetchAzureStorageMountRequest,
     },
     dispatch
   );

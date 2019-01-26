@@ -4,9 +4,20 @@ import { ConnectionString } from '../../../modules/site/config/connectionstrings
 import { AppSettingsFormValues, FormAppSetting, FormConnectionString } from './AppSettings.types';
 import { AppSettingsDataLoaderProps } from './AppSettingsDataLoader';
 import { Metadata } from '../../../modules/site/config/metadata/reducer';
+import { ArmAzureStorageMount } from '../../../modules/site/config/azureStorageAccounts/reducer';
 
 export const convertStateToForm = (props: AppSettingsDataLoaderProps): AppSettingsFormValues => {
-  const { site, config, appSettings, connectionStrings, metadata, siteWritePermission, slotConfigNames, productionWritePermission } = props;
+  const {
+    site,
+    config,
+    appSettings,
+    connectionStrings,
+    metadata,
+    siteWritePermission,
+    slotConfigNames,
+    productionWritePermission,
+    azureStorageMounts,
+  } = props;
   return {
     site: site.data,
     config: config.data,
@@ -17,6 +28,7 @@ export const convertStateToForm = (props: AppSettingsDataLoaderProps): AppSettin
     virtualApplications:
       config.data && config.data && config.data.properties && flattenVirtualApplicationsList(config.data.properties.virtualApplications),
     currentlySelectedStack: getCurrentStackString(config.data, metadata.data),
+    azureStorageMounts: getFormAzureStorageMount(azureStorageMounts.data, slotConfigNames.data),
   };
 };
 type ApiSetupReturn = { site: ArmObj<Site>; config: ArmObj<SiteConfig>; slotConfigNames?: ArmObj<SlotConfigNames> };
@@ -78,6 +90,15 @@ export function getFormAppSetting(settingsData: ArmObj<AppSettings>, slotConfigN
     name: key,
     value: settingsData.properties[key],
     sticky: !!appSettingNames && appSettingNames.indexOf(key) > -1,
+  }));
+}
+
+export function getFormAzureStorageMount(storageData: ArmObj<ArmAzureStorageMount>, slotConfigNames: ArmObj<SlotConfigNames>) {
+  const { azureStorageConfigNames } = slotConfigNames.properties;
+  return Object.keys(storageData.properties).map(key => ({
+    name: key,
+    ...storageData.properties[key],
+    sticky: !!azureStorageConfigNames && azureStorageConfigNames.indexOf(key) > -1,
   }));
 }
 

@@ -18,6 +18,7 @@ import { RootState } from '../../../modules/types';
 import { ThemeExtended } from '../../../theme/SemanticColorsExtended';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
+import { AzureStorageMounts } from './AzureStorageMounts/AzureStorageMounts';
 
 export const settingsWrapper = style({
   paddingLeft: '15px',
@@ -88,7 +89,7 @@ const AppSettingsForm: React.FC<FormikProps<AppSettingsFormValues> & InjectedTra
           <DefaultDocumentsPivot {...props} />
         </PivotItem>
       ) : (
-        <PivotItem />
+        <></>
       )}
 
       {enablePathMappings ? (
@@ -101,8 +102,17 @@ const AppSettingsForm: React.FC<FormikProps<AppSettingsFormValues> & InjectedTra
           <PathMappingsPivot {...props} />
         </PivotItem>
       ) : (
-        <PivotItem />
+        <></>
       )}
+
+      <PivotItem
+        onRenderItemLink={(link: IPivotItemProps, defaultRenderer: (link: IPivotItemProps) => JSX.Element) =>
+          CustomTabRenderer(link, defaultRenderer, theme, pathMappingsDirtyCheck)
+        }
+        itemKey="pathMappings"
+        linkText={t('pathMappings')}>
+        <AzureStorageMounts {...props} />
+      </PivotItem>
     </Pivot>
   );
 };

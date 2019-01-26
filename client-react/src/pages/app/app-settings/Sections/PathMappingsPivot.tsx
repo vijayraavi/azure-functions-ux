@@ -5,6 +5,7 @@ import { InjectedTranslateProps, translate } from 'react-i18next';
 import HandlerMappings from '../HandlerMappings/HandlerMappings';
 import VirtualApplications from '../VirtualApplications/VirtualApplications';
 import { isEqual } from 'lodash-es';
+
 const DefaultDocumentsPivot: React.FC<FormikProps<AppSettingsFormValues> & InjectedTranslateProps> = props => {
   const { t } = props;
 
