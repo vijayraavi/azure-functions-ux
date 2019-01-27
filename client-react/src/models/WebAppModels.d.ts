@@ -1037,12 +1037,12 @@ export interface MetricName {
 }
 
 export interface StorageAccount {
-  accessTier: string;
-  creationTime: Date;
-  primaryEndpoints: Primaryendpoints;
+  primaryEndpoints: { [key: string]: string };
   primaryLocation: string;
   provisioningState: string;
+  secondaryLocation: string;
   statusOfPrimary: string;
+  statusOfSecondary: string;
 }
 
 export interface Primaryendpoints {

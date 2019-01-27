@@ -12,6 +12,7 @@ import webConfig from './site/config/web/reducer';
 import site from './site/reducer';
 import slots from './site/slots/reducer';
 import azureStorageMount from './site/config/azureStorageAccounts/reducer';
+import azureStorageAccounts from './storageAccounts/reducer';
 const rootReducer = combineReducers({
   portalService,
   /*ARM values */
@@ -26,6 +27,7 @@ const rootReducer = combineReducers({
   slotConfigNames,
   billingMeters,
   azureStorageMount,
+  azureStorageAccounts,
 });
 
 export default rootReducer;

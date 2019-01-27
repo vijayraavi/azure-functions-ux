@@ -7,6 +7,9 @@ import DisplayTableWithEmptyMessage from '../../../../components/DisplayTableWit
 
 import { AppSettingsFormValues, FormAzureStorageMounts } from '../AppSettings.types';
 import IconButton from '../../../../components/IconButton/IconButton';
+import { ActionButton } from 'office-ui-fabric-react/lib/Button';
+import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
+import AzureStorageMountsAddEdit from './AzureStorageMountsAddEdit';
 
 export interface AzureStorageMountState {
   showPanel: boolean;
@@ -36,6 +39,26 @@ export class AzureStorageMounts extends React.Component<
     }
     return (
       <>
+        <ActionButton
+          id="app-settings-new-azure-storage-mount-button"
+          disabled={!values.siteWritePermission}
+          onClick={this._createNewItem}
+          styles={{ root: { marginTop: '5px' } }}
+          iconProps={{ iconName: 'Add' }}>
+          {t('addNewHandler')}
+        </ActionButton>
+        <Panel
+          isOpen={this.state.showPanel}
+          type={PanelType.medium}
+          onDismiss={this._onCancel}
+          headerText={t('newAzureStorageMount')}
+          closeButtonAriaLabel={t('close')}>
+          <AzureStorageMountsAddEdit
+            azureStorageMount={this.state.currentAzureStorageMount!}
+            updateAzureStorageMount={this._onClosePanel.bind(this)}
+            closeBlade={this._onCancel.bind(this)}
+          />
+        </Panel>
         <DisplayTableWithEmptyMessage
           items={values.azureStorageMounts || []}
           columns={this._getColumns()}
@@ -49,48 +72,47 @@ export class AzureStorageMounts extends React.Component<
     );
   }
 
-  // private _createNewItem = () => {
-  //   const blankAzureStorageMount: FormAzureStorageMounts = {
-  //     name: '',
-  //     type: 0,
-  //     accountName: '',
-  //     shareName: '',
-  //     accessKey: '',
-  //     mountPath: '',
-  //     state: 0,
-  //     sticky: false,
-  //   };
-  //   this.setState({
-  //     showPanel: true,
-  //     currentAzureStorageMount: blankAzureStorageMount,
-  //     createNewItem: true,
-  //     currentItemIndex: -1,
-  //   });
-  // };
+  private _createNewItem = () => {
+    const blankAzureStorageMount: FormAzureStorageMounts = {
+      name: '',
+      type: 0,
+      accountName: '',
+      shareName: '',
+      accessKey: '',
+      mountPath: '',
+      sticky: false,
+    };
+    this.setState({
+      showPanel: true,
+      currentAzureStorageMount: blankAzureStorageMount,
+      createNewItem: true,
+      currentItemIndex: -1,
+    });
+  };
 
-  // private _onClosePanel = (item: FormAzureStorageMounts): void => {
-  //   const { values, setValues } = this.props;
-  //   const azureStorageMountsItem = values.azureStorageMounts || [];
-  //   const azureStorageMounts = [...azureStorageMountsItem];
-  //   if (!this.state.createNewItem) {
-  //     azureStorageMounts[this.state.currentItemIndex!] = item;
-  //     setValues({
-  //       ...values,
-  //       azureStorageMounts,
-  //     });
-  //   } else {
-  //     azureStorageMounts.push(item);
-  //     setValues({
-  //       ...values,
-  //       azureStorageMounts,
-  //     });
-  //   }
-  //   this.setState({ createNewItem: false, showPanel: false });
-  // };
+  private _onClosePanel = (item: FormAzureStorageMounts): void => {
+    const { values, setValues } = this.props;
+    const azureStorageMountsItem = values.azureStorageMounts || [];
+    const azureStorageMounts = [...azureStorageMountsItem];
+    if (!this.state.createNewItem) {
+      azureStorageMounts[this.state.currentItemIndex!] = item;
+      setValues({
+        ...values,
+        azureStorageMounts,
+      });
+    } else {
+      azureStorageMounts.push(item);
+      setValues({
+        ...values,
+        azureStorageMounts,
+      });
+    }
+    this.setState({ createNewItem: false, showPanel: false });
+  };
 
-  // private _onCancel = (): void => {
-  //   this.setState({ createNewItem: false, showPanel: false });
-  // };
+  private _onCancel = (): void => {
+    this.setState({ createNewItem: false, showPanel: false });
+  };
 
   private _onShowPanel = (item: FormAzureStorageMounts, index: number): void => {
     this.setState({

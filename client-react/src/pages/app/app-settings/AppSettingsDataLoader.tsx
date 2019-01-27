@@ -29,6 +29,7 @@ import { AxiosError } from 'axios';
 import LogService from '../../../utils/LogService';
 import { fetchAzureStorageMountRequest } from '../../../modules/site/config/azureStorageAccounts/actions';
 import { AzureStorageMountState } from '../../../modules/site/config/azureStorageAccounts/reducer';
+import { fetchStorageAccountsRequest } from '../../../modules/storageAccounts/actions';
 export interface AppSettingsDataLoaderProps {
   children: (
     props: {
@@ -51,6 +52,7 @@ export interface AppSettingsDataLoaderProps {
   updateSite: (site: ArmObj<Site>) => void;
   updateConfig: (config: ArmObj<SiteConfig>) => void;
   updateSlotConfig: (slotNames: ArmObj<SlotConfigNames>) => void;
+  fetchAzureStorageAccounts: () => void;
   resourceId: string;
   site: SiteState;
   config: ConfigStateType;
@@ -122,6 +124,7 @@ const AppSettingsDataLoader: React.SFC<AppSettingsDataLoaderProps & InjectedTran
     fetchPermissions,
     fetchMetadata,
     fetchSlotConfigNames,
+    fetchAzureStorageAccounts,
     resourceId,
     fetchStacks,
     metadata,
@@ -212,6 +215,7 @@ const AppSettingsDataLoader: React.SFC<AppSettingsDataLoaderProps & InjectedTran
     fetchAppSettings();
     fetchPermissions([{ resourceId, action: './write' }]);
     fetchReadonly([{ resourceId }]);
+    fetchAzureStorageAccounts();
     if (resourceId.includes('/slots/')) {
       const productionId = getProductionId(resourceId);
       fetchPermissions([{ resourceId: productionId, action: './write' }]);
@@ -275,6 +279,7 @@ const mapDispatchToProps = (dispatch: Dispatch<RootAction>) =>
       updateSlotConfig: updateSlotConfigRequest,
       fetchReadonly: fetchReadonlyLocks,
       fetchAzureStorageMounts: fetchAzureStorageMountRequest,
+      fetchAzureStorageAccounts: fetchStorageAccountsRequest,
     },
     dispatch
   );

@@ -10,6 +10,7 @@ import slots from './modules/site/slots/epics';
 import portal from './modules/portal/epics';
 import loggingEpics from './LoggingEpics';
 import azureStorageMounts from './modules/site/config/azureStorageAccounts/epics';
+import azureStorageAccounts from './modules/storageAccounts/epics';
 export default combineEpics(
   site,
   appSettings,
@@ -21,5 +22,6 @@ export default combineEpics(
   stacks,
   portal,
   loggingEpics,
-  azureStorageMounts
+  azureStorageMounts,
+  azureStorageAccounts
 );
