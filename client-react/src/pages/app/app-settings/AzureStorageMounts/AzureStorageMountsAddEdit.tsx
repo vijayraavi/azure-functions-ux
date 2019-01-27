@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { RootState } from '../../../../modules/types';
 import { StorageAccountsState } from '../../../../modules/storageAccounts/reducer';
 import AzureStorageMountsAddEditBasic from './AzureStorageMountsAddEditBasic';
+import AzureStorageMountsAddEditAdvanced from './AzureStorageMountsAddEditAdvanced';
 
 export interface AzureStorageMountsAddEditProps {
   updateAzureStorageMount: (item: FormAzureStorageMounts) => any;
@@ -59,6 +60,9 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
     setConfigurationOption(configOptions.key);
   };
 
+  const updateMountPath = (e: any, mountPath: string) => {
+    setCurrentAzureStorageMount({ ...currentAzureStorageMount, mountPath });
+  };
   return (
     <form>
       <TextField
@@ -94,6 +98,22 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
           setCurrentAzureStorageMount={setCurrentAzureStorageMount}
         />
       )}
+      {confiurationOption === 'advanced' && (
+        <AzureStorageMountsAddEditAdvanced
+          {...props}
+          currentAzureStorageMount={currentAzureStorageMount}
+          setCurrentAzureStorageMount={setCurrentAzureStorageMount}
+        />
+      )}
+      <TextField
+        label={t('mountPath')}
+        id="azure-storage-mounts-mount-path"
+        value={currentAzureStorageMount.mountPath}
+        onChange={updateMountPath}
+        styles={{
+          root: formElementStyle,
+        }}
+      />
       <ActionBar
         id="handler-mappings-edit-footer"
         primaryButton={actionBarPrimaryButtonProps}
