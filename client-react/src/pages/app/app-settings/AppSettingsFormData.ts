@@ -1,7 +1,7 @@
 import { ArmObj, SiteConfig, SlotConfigNames, VirtualApplication, Site, NameValuePair, ConnStringInfo } from '../../../models/WebAppModels';
 import { AppSettings } from '../../../modules/site/config/appsettings/reducer';
 import { ConnectionString } from '../../../modules/site/config/connectionstrings/reducer';
-import { AppSettingsFormValues, FormAppSetting, FormConnectionString } from './AppSettings.types';
+import { AppSettingsFormValues, FormAppSetting, FormConnectionString, FormAzureStorageMounts } from './AppSettings.types';
 import { AppSettingsDataLoaderProps } from './AppSettingsDataLoader';
 import { Metadata } from '../../../modules/site/config/metadata/reducer';
 import { ArmAzureStorageMount } from '../../../modules/site/config/azureStorageAccounts/reducer';
@@ -28,7 +28,7 @@ export const convertStateToForm = (props: AppSettingsDataLoaderProps): AppSettin
     virtualApplications:
       config.data && config.data && config.data.properties && flattenVirtualApplicationsList(config.data.properties.virtualApplications),
     currentlySelectedStack: getCurrentStackString(config.data, metadata.data),
-    azureStorageMounts: getFormAzureStorageMount(azureStorageMounts.data, slotConfigNames.data),
+    azureStorageMounts: getFormAzureStorageMount(azureStorageMounts.data),
   };
 };
 type ApiSetupReturn = { site: ArmObj<Site>; config: ArmObj<SiteConfig>; slotConfigNames?: ArmObj<SlotConfigNames> };
@@ -39,13 +39,14 @@ export const convertFormToState = (
 ): ApiSetupReturn => {
   const config = values.config;
   config.properties.virtualApplications = unFlattenVirtualApplicationsList(values.virtualApplications);
-
+  config.properties.azureStorageAccounts = undefined;
   const site = values.site;
 
   site.properties.siteConfig = {
     appSettings: getAppSettingsFromForm(values.appSettings),
     connectionStrings: getConnectionStringsFromForm(values.connectionStrings),
     metadata: getMetadataToSet(currentMetadata, values.currentlySelectedStack),
+    azureStorageAccounts: getAzureStorageMountFromForm(values.azureStorageMounts),
   };
 
   const slotConfigNames = getStickySettings(values.appSettings, values.connectionStrings, oldSlotNameSettings);
@@ -93,13 +94,20 @@ export function getFormAppSetting(settingsData: ArmObj<AppSettings>, slotConfigN
   }));
 }
 
-export function getFormAzureStorageMount(storageData: ArmObj<ArmAzureStorageMount>, slotConfigNames: ArmObj<SlotConfigNames>) {
-  const { azureStorageConfigNames } = slotConfigNames.properties;
+export function getFormAzureStorageMount(storageData: ArmObj<ArmAzureStorageMount>) {
   return Object.keys(storageData.properties).map(key => ({
     name: key,
     ...storageData.properties[key],
-    sticky: !!azureStorageConfigNames && azureStorageConfigNames.indexOf(key) > -1,
   }));
+}
+
+export function getAzureStorageMountFromForm(storageData: FormAzureStorageMounts[]): ArmAzureStorageMount {
+  const storageMountFromForm: ArmAzureStorageMount = {};
+  storageData.forEach(store => {
+    const { name, ...rest } = store;
+    storageMountFromForm[name] = rest;
+  });
+  return storageMountFromForm;
 }
 
 export function getAppSettingsFromForm(appSettings: FormAppSetting[]): NameValuePair[] {

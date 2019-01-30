@@ -1,6 +1,6 @@
 import { createStandardAction } from 'typesafe-actions';
 
-import { ArmObj } from '../../../../models/WebAppModels';
+import { ArmObj, Site } from '../../../../models/WebAppModels';
 import {
   AZURE_STORAGE_MOUNT_FETCH_FAILURE,
   AZURE_STORAGE_MOUNT_FETCH_REQUEST,
@@ -8,7 +8,7 @@ import {
   AZURE_STORAGE_MOUNT_UPDATE_FAILURE,
   AZURE_STORAGE_MOUNT_UPDATE_REQUEST,
   AZURE_STORAGE_MOUNT_UPDATE_SUCCESS,
-  //UPDATE_AZURE_STORAGE_MOUNT_FROM_SITE_UPDATE,
+  UPDATE_AZURE_STORAGE_MOUNT_FROM_SITE_UPDATE,
 } from './actionTypes';
 import { ArmAzureStorageMount } from './reducer';
 
@@ -39,16 +39,9 @@ export const updateAzureStorageMountFailure = createStandardAction(AZURE_STORAGE
   error,
 }));
 
-// export const updateAzureStorageMountFromSiteUpdate = createStandardAction(UPDATE_AZURE_STORAGE_MOUNT_FROM_SITE_UPDATE).map(
-//   (site: ArmObj<Site>) => {
-//     const AzureStorageMountFromSite = !!site.properties && !!site.properties.siteConfig && site.properties.siteConfig.AzureStorageMount;
-//     if (AzureStorageMountFromSite) {
-//       const updatedAzureStorageMount: AzureStorageMount = {};
-//       AzureStorageMountFromSite.forEach(appSetting => {
-//         updatedAzureStorageMount[appSetting.name] = appSetting.value;
-//       });
-//       return { AzureStorageMount: updatedAzureStorageMount };
-//     }
-//     return { AzureStorageMount: null };
-//   }
-// );
+export const updateAzureStorageMountFromSiteUpdate = createStandardAction(UPDATE_AZURE_STORAGE_MOUNT_FROM_SITE_UPDATE).map(
+  (site: ArmObj<Site>) => {
+    const azureStorageMount = !!site.properties && !!site.properties.siteConfig && site.properties.siteConfig.azureStorageAccounts;
+    return { azureStorageMount };
+  }
+);

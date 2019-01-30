@@ -4685,4 +4685,19 @@ Set to "External URL" to use an API definition that is hosted elsewhere.</value>
   <data name="scaleOutDescription" xml:space="preserve">
     <value>Configure scale out settings for your App Service Plan.</value>
   </data>
+  <data name="accountName" xml:space="preserve">
+    <value>Account Name</value>
+  </data>
+  <data name="azureBlob" xml:space="preserve">
+    <value>Azure Blob</value>
+  </data>
+  <data name="azureFiles" xml:space="preserve">
+    <value>Azure Files</value>
+  </data>
+  <data name="newAzureStorageMount" xml:space="preserve">
+    <value>New Azure Storage Mount</value>
+  </data>
+  <data name="emptyAzureStorageMount" xml:space="preserve">
+    <value>Empty Azure Storage Mount</value>
+  </data>
 </root>

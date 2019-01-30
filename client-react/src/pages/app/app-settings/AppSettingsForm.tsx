@@ -18,7 +18,7 @@ import { RootState } from '../../../modules/types';
 import { ThemeExtended } from '../../../theme/SemanticColorsExtended';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
-import { AzureStorageMounts } from './AzureStorageMounts/AzureStorageMounts';
+import AzureStorageMounts from './AzureStorageMounts/AzureStorageMounts';
 
 export const settingsWrapper = style({
   paddingLeft: '15px',

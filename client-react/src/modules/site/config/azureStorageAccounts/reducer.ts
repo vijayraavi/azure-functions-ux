@@ -5,11 +5,16 @@ import { ArmObj } from '../../../../models/WebAppModels';
 import { metadataReducer } from '../../../ApiReducerHelper';
 import { ApiState } from '../../../types';
 import * as actions from './actions';
-import { AZURE_STORAGE_MOUNT_FETCH_SUCCESS, AZURE_STORAGE_MOUNT_UPDATE_SUCCESS, AREA_STRING } from './actionTypes';
+import {
+  AZURE_STORAGE_MOUNT_FETCH_SUCCESS,
+  AZURE_STORAGE_MOUNT_UPDATE_SUCCESS,
+  AREA_STRING,
+  UPDATE_AZURE_STORAGE_MOUNT_FROM_SITE_UPDATE,
+} from './actionTypes';
 
 export enum StorageType {
-  azureFiles = 0,
-  azureBlob = 1,
+  azureFiles = 'AzureFiles',
+  azureBlob = 'AzureBlob',
 }
 
 export type AzureStorageMount = {
@@ -44,8 +49,8 @@ export default combineReducers<AzureStorageMountState, AzureStorageMountActions>
         return action.azureMount;
       case AZURE_STORAGE_MOUNT_UPDATE_SUCCESS:
         return action.azureMount;
-      // case UPDATE_AZURE_STORAGE_MOUNT_FROM_SITE_UPDATE:
-      //   return { ...state, properties: action.appSettings ? action.appSettings : state.properties };
+      case UPDATE_AZURE_STORAGE_MOUNT_FROM_SITE_UPDATE:
+        return { ...state, properties: action.azureStorageMount ? action.azureStorageMount : state.properties };
       default:
         return state;
     }

@@ -10,18 +10,26 @@ import IconButton from '../../../../components/IconButton/IconButton';
 import { ActionButton } from 'office-ui-fabric-react/lib/Button';
 import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 import AzureStorageMountsAddEdit from './AzureStorageMountsAddEdit';
+import { StorageType, AzureStorageMountState } from '../../../../modules/site/config/azureStorageAccounts/reducer';
+import compose from 'recompose/compose';
+import { RootState } from '../../../../modules/types';
+import { connect } from 'react-redux';
+import LoadingComponent from '../../../../components/loading/loading-component';
+import { MessageBar, MessageBarType } from 'office-ui-fabric-react';
 
-export interface AzureStorageMountState {
+export interface AzureStorageMountLocalState {
   showPanel: boolean;
   currentAzureStorageMount: FormAzureStorageMounts | null;
   currentItemIndex: number | null;
   createNewItem: boolean;
 }
 
-export class AzureStorageMounts extends React.Component<
-  FormikProps<AppSettingsFormValues> & InjectedTranslateProps,
-  AzureStorageMountState
-> {
+interface StateProps {
+  azureStorageMountsProp: AzureStorageMountState;
+}
+
+type CombinedProps = FormikProps<AppSettingsFormValues> & InjectedTranslateProps & StateProps;
+export class AzureStorageMounts extends React.Component<CombinedProps, AzureStorageMountLocalState> {
   constructor(props) {
     super(props);
     this.state = {
@@ -33,9 +41,16 @@ export class AzureStorageMounts extends React.Component<
   }
 
   public render() {
-    const { values, t } = this.props;
-    if (!values.config) {
-      return null;
+    const { values, t, azureStorageMountsProp } = this.props;
+    if (azureStorageMountsProp.metadata.loading) {
+      return <LoadingComponent pastDelay={true} error={false} isLoading={true} timedOut={false} retry={() => null} />;
+    }
+    if (!values.siteWritePermission) {
+      return (
+        <MessageBar messageBarType={MessageBarType.warning} isMultiline={false}>
+          {t('applicationSettingsNoPermission')}
+        </MessageBar>
+      );
     }
     return (
       <>
@@ -45,7 +60,7 @@ export class AzureStorageMounts extends React.Component<
           onClick={this._createNewItem}
           styles={{ root: { marginTop: '5px' } }}
           iconProps={{ iconName: 'Add' }}>
-          {t('addNewHandler')}
+          {t('newAzureStorageMount')}
         </ActionButton>
         <Panel
           isOpen={this.state.showPanel}
@@ -55,6 +70,7 @@ export class AzureStorageMounts extends React.Component<
           closeButtonAriaLabel={t('close')}>
           <AzureStorageMountsAddEdit
             azureStorageMount={this.state.currentAzureStorageMount!}
+            otherAzureStorageMounts={values.azureStorageMounts}
             updateAzureStorageMount={this._onClosePanel.bind(this)}
             closeBlade={this._onCancel.bind(this)}
           />
@@ -66,7 +82,7 @@ export class AzureStorageMounts extends React.Component<
           layoutMode={DetailsListLayoutMode.justified}
           selectionMode={SelectionMode.none}
           selectionPreservedOnEmptyClick={true}
-          emptyMessage={t('emptyHandlerMappings')}
+          emptyMessage={t('emptyAzureStorageMount')}
         />
       </>
     );
@@ -75,12 +91,11 @@ export class AzureStorageMounts extends React.Component<
   private _createNewItem = () => {
     const blankAzureStorageMount: FormAzureStorageMounts = {
       name: '',
-      type: 0,
+      type: StorageType.azureBlob,
       accountName: '',
       shareName: '',
       accessKey: '',
       mountPath: '',
-      sticky: false,
     };
     this.setState({
       showPanel: true,
@@ -169,7 +184,7 @@ export class AzureStorageMounts extends React.Component<
     return [
       {
         key: 'name',
-        name: t('name'),
+        name: t('_name'),
         fieldName: 'name',
         minWidth: 100,
         maxWidth: 350,
@@ -246,4 +261,12 @@ export class AzureStorageMounts extends React.Component<
   };
 }
 
-export default translate('translation')(AzureStorageMounts);
+const mapStateToProps = (state: RootState) => {
+  return {
+    azureStorageMountsProp: state.azureStorageMount,
+  };
+};
+export default compose(
+  connect(mapStateToProps),
+  translate('translation')
+)(AzureStorageMounts);

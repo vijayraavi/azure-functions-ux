@@ -15,8 +15,8 @@ import AzureStorageMountsAddEditAdvanced from './AzureStorageMountsAddEditAdvanc
 
 export interface AzureStorageMountsAddEditProps {
   updateAzureStorageMount: (item: FormAzureStorageMounts) => any;
+  otherAzureStorageMounts: FormAzureStorageMounts[];
   closeBlade: () => void;
-
   azureStorageMount: FormAzureStorageMounts;
 }
 
@@ -28,9 +28,15 @@ export type AzureStorageMountsAddEditPropsCombined = AzureStorageMountsAddEditPr
   InjectedTranslateProps &
   AzureStorageMountsAddEditStateProps;
 const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombined> = props => {
-  const { updateAzureStorageMount, t, closeBlade, azureStorageMount } = props;
+  const { updateAzureStorageMount, t, closeBlade, azureStorageMount, otherAzureStorageMounts, storageAccounts } = props;
   const [currentAzureStorageMount, setCurrentAzureStorageMount] = React.useState(azureStorageMount);
   const [confiurationOption, setConfigurationOption] = React.useState('basic');
+  const [basicDisabled, setBasicDisabled] = React.useState(false);
+  const [nameError, setNameError] = React.useState('');
+
+  const validateName = (value: string) => {
+    return otherAzureStorageMounts.filter(v => v.name === value).length >= 1 ? 'Azure Storage Mount names must be unique' : '';
+  };
   const save = () => {
     updateAzureStorageMount(currentAzureStorageMount);
   };
@@ -53,6 +59,8 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
     disable: false,
   };
   const updateAzureStorageMountName = (e: any, name: string) => {
+    const error = validateName(name);
+    setNameError(error);
     setCurrentAzureStorageMount({ ...currentAzureStorageMount, name });
   };
 
@@ -63,16 +71,26 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
   const updateMountPath = (e: any, mountPath: string) => {
     setCurrentAzureStorageMount({ ...currentAzureStorageMount, mountPath });
   };
+
+  React.useEffect(() => {
+    if (storageAccounts.data.value.length === 0) {
+      setConfigurationOption('advanced');
+      setBasicDisabled(true);
+    } else if (!storageAccounts.data.value.find(x => x.name === currentAzureStorageMount.name)) {
+      setConfigurationOption('advanced');
+    }
+  }, []);
   return (
     <form>
       <TextField
-        label={t('name')}
+        label={t('_name')}
         id="azure-storage-mounts-name"
         value={currentAzureStorageMount.name}
         onChange={updateAzureStorageMountName}
         styles={{
           root: formElementStyle,
         }}
+        errorMessage={nameError}
         autoFocus
       />
       <ChoiceGroup
@@ -83,6 +101,7 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
           {
             key: 'basic',
             text: t('basic'),
+            disabled: basicDisabled,
           },
           {
             key: 'advanced',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { AzureStorageMountsAddEditPropsCombined } from './AzureStorageMountsAddEdit';
 import { AzureStorageMountsAddEditBasicProps } from './AzureStorageMountsAddEditBasic';
-import { ChoiceGroup, TextField } from 'office-ui-fabric-react';
+import { ChoiceGroup, TextField, IChoiceGroupOption } from 'office-ui-fabric-react';
 import { formElementStyle } from '../AppSettings.styles';
 export interface AzureStorageMountsAddEditAdvancedProps {}
 const AzureStorageMountsAddEditAdvanced: React.FC<AzureStorageMountsAddEditPropsCombined & AzureStorageMountsAddEditBasicProps> = props => {
@@ -9,6 +9,10 @@ const AzureStorageMountsAddEditAdvanced: React.FC<AzureStorageMountsAddEditProps
   const onAccountChange = (e: any, accountName: string) => {
     setCurrentAzureStorageMount({ ...currentAzureStorageMount, accountName });
   };
+  const onTypeChange = (e: any, typeOption: IChoiceGroupOption) => {
+    setCurrentAzureStorageMount({ ...currentAzureStorageMount, type: typeOption.key });
+  };
+
   return (
     <>
       <TextField
@@ -27,13 +31,14 @@ const AzureStorageMountsAddEditAdvanced: React.FC<AzureStorageMountsAddEditProps
         options={[
           {
             key: 'AzureBlob',
-            text: t('AzureBlob'),
+            text: t('azureBlob'),
           },
           {
             key: 'AzureFiles',
             text: t('azureFiles'),
           },
         ]}
+        onChange={onTypeChange}
       />
       <TextField
         label={t('shareName')}
