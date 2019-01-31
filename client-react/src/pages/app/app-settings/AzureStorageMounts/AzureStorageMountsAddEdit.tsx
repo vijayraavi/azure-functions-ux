@@ -1,5 +1,5 @@
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { InjectedTranslateProps, translate } from 'react-i18next';
 
 import ActionBar from '../../../../components/ActionBar';
@@ -29,10 +29,10 @@ export type AzureStorageMountsAddEditPropsCombined = AzureStorageMountsAddEditPr
   AzureStorageMountsAddEditStateProps;
 const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombined> = props => {
   const { updateAzureStorageMount, t, closeBlade, azureStorageMount, otherAzureStorageMounts, storageAccounts } = props;
-  const [currentAzureStorageMount, setCurrentAzureStorageMount] = React.useState(azureStorageMount);
-  const [confiurationOption, setConfigurationOption] = React.useState('basic');
-  const [basicDisabled, setBasicDisabled] = React.useState(false);
-  const [nameError, setNameError] = React.useState('');
+  const [currentAzureStorageMount, setCurrentAzureStorageMount] = useState(azureStorageMount);
+  const [confiurationOption, setConfigurationOption] = useState('basic');
+  const [basicDisabled, setBasicDisabled] = useState(false);
+  const [nameError, setNameError] = useState('');
 
   const validateName = (value: string) => {
     return otherAzureStorageMounts.filter(v => v.name === value).length >= 1 ? 'Azure Storage Mount names must be unique' : '';
@@ -72,11 +72,14 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
     setCurrentAzureStorageMount({ ...currentAzureStorageMount, mountPath });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (storageAccounts.data.value.length === 0) {
       setConfigurationOption('advanced');
       setBasicDisabled(true);
-    } else if (!storageAccounts.data.value.find(x => x.name === currentAzureStorageMount.name)) {
+    } else if (
+      currentAzureStorageMount.accountName &&
+      !storageAccounts.data.value.find(x => x.name === currentAzureStorageMount.accountName)
+    ) {
       setConfigurationOption('advanced');
     }
   }, []);

@@ -76,6 +76,7 @@ const AzureStorageMountsAddEditBasic: React.FC<AzureStorageMountsAddEditPropsCom
   );
   const blobContainerOptions = accountSharesBlob.map((x: any) => ({ key: x.name, text: x.name }));
   const filesContainerOptions = accountSharesFiles.map((x: any) => ({ key: x.name, text: x.name }));
+
   return (
     <>
       <ComboBox
