@@ -5,12 +5,10 @@ import { AzureStorageMountsAddEditPropsCombined } from './AzureStorageMountsAddE
 import MakeArmCall from '../../../../modules/ArmHelper';
 import axios from 'axios';
 import { formElementStyle } from '../AppSettings.styles';
-export interface AzureStorageMountsAddEditBasicProps {
-  currentAzureStorageMount: FormAzureStorageMounts;
-  setCurrentAzureStorageMount: (newState: unknown) => void;
-}
-const AzureStorageMountsAddEditBasic: React.FC<AzureStorageMountsAddEditPropsCombined & AzureStorageMountsAddEditBasicProps> = props => {
-  const { currentAzureStorageMount, setCurrentAzureStorageMount, t } = props;
+import { FormikProps } from 'formik';
+import { StorageType } from '../../../../modules/site/config/azureStorageAccounts/reducer';
+const AzureStorageMountsAddEditBasic: React.FC<FormikProps<FormAzureStorageMounts> & AzureStorageMountsAddEditPropsCombined> = props => {
+  const { t } = props;
   const [accountSharesFiles, setAccountSharesFiles] = useState([]);
   const [accountSharesBlob, setAccountSharesBlob] = useState([]);
   const [sharesLoading, setSharesLoading] = useState(false);
@@ -18,21 +16,21 @@ const AzureStorageMountsAddEditBasic: React.FC<AzureStorageMountsAddEditPropsCom
   const accountOptions = props.storageAccounts.data.value.map(val => ({ key: val.name, text: val.name }));
 
   const onAccountChange = (e: any, accountName: IComboBoxOption) => {
-    setCurrentAzureStorageMount({ ...currentAzureStorageMount, accountName: accountName.key });
+    props.setValues({ ...props.values, accountName: accountName.key as string });
   };
   const setAccessKey = (accessKey: string) => {
-    setCurrentAzureStorageMount({ ...currentAzureStorageMount, accessKey });
-  };
-  const onAccountShareChange = (e: any, shareOption: IComboBoxOption) => {
-    setCurrentAzureStorageMount({ ...currentAzureStorageMount, shareName: shareOption.key });
-  };
-  const onTypeChange = (e: any, typeOption: IChoiceGroupOption) => {
-    setCurrentAzureStorageMount({ ...currentAzureStorageMount, type: typeOption.key });
+    props.setValues({ ...props.values, accessKey });
   };
 
+  const onAccountShareChange = (e: any, shareOption: IComboBoxOption) => {
+    props.setValues({ ...props.values, shareName: shareOption.key as string });
+  };
+  const onTypeChange = (e: any, typeOption: IChoiceGroupOption) => {
+    props.setValues({ ...props.values, type: typeOption.key as StorageType });
+  };
   useEffect(
     () => {
-      const storageAccountId = props.storageAccounts.data.value.find(x => x.name === currentAzureStorageMount.accountName);
+      const storageAccountId = props.storageAccounts.data.value.find(x => x.name === props.values.accountName);
       setAccountError('');
       if (storageAccountId) {
         setAccountSharesBlob([]);
@@ -42,17 +40,17 @@ const AzureStorageMountsAddEditBasic: React.FC<AzureStorageMountsAddEditPropsCom
           .then(async (value: any) => {
             setAccessKey(value.keys[0].value);
             const payload = {
-              accountName: currentAzureStorageMount.accountName,
+              accountName: props.values.accountName,
               accessKey: value.keys[0].value,
             };
             try {
               const blobCall = axios.post(
-                `https://functions.azure.com/api/getStorageContainers?accountName=${currentAzureStorageMount.accountName}`,
+                `https://functions.azure.com/api/getStorageContainers?accountName=${props.values.accountName}`,
                 payload
               );
 
               const filesCall = axios.post(
-                `https://functions.azure.com/api/getStorageFileShares?accountName=${currentAzureStorageMount.accountName}`,
+                `https://functions.azure.com/api/getStorageFileShares?accountName=${props.values.accountName}`,
                 payload
               );
 
@@ -72,7 +70,7 @@ const AzureStorageMountsAddEditBasic: React.FC<AzureStorageMountsAddEditPropsCom
           });
       }
     },
-    [currentAzureStorageMount.accountName]
+    [props.values.accountName]
   );
   const blobContainerOptions = accountSharesBlob.map((x: any) => ({ key: x.name, text: x.name }));
   const filesContainerOptions = accountSharesFiles.map((x: any) => ({ key: x.name, text: x.name }));
@@ -80,7 +78,7 @@ const AzureStorageMountsAddEditBasic: React.FC<AzureStorageMountsAddEditPropsCom
   return (
     <>
       <ComboBox
-        selectedKey={currentAzureStorageMount.accountName}
+        selectedKey={props.values.accountName}
         options={accountOptions}
         label="Storage Accounts"
         allowFreeform
@@ -93,7 +91,7 @@ const AzureStorageMountsAddEditBasic: React.FC<AzureStorageMountsAddEditPropsCom
       />
       <ChoiceGroup
         id="azure-storage-mounts-name"
-        selectedKey={currentAzureStorageMount.type}
+        selectedKey={props.values.type}
         label="Storage Type"
         options={[
           {
@@ -110,8 +108,8 @@ const AzureStorageMountsAddEditBasic: React.FC<AzureStorageMountsAddEditPropsCom
         onChange={onTypeChange}
       />
       <ComboBox
-        selectedKey={currentAzureStorageMount.shareName}
-        options={currentAzureStorageMount.type === 'AzureBlob' ? blobContainerOptions : filesContainerOptions}
+        selectedKey={props.values.shareName}
+        options={props.values.type === 'AzureBlob' ? blobContainerOptions : filesContainerOptions}
         label="Storage Container"
         allowFreeform
         autoComplete="on"

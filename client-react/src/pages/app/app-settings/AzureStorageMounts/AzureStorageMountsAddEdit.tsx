@@ -1,4 +1,3 @@
-import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import React, { useState, useEffect } from 'react';
 import { InjectedTranslateProps, translate } from 'react-i18next';
 
@@ -12,6 +11,8 @@ import { RootState } from '../../../../modules/types';
 import { StorageAccountsState } from '../../../../modules/storageAccounts/reducer';
 import AzureStorageMountsAddEditBasic from './AzureStorageMountsAddEditBasic';
 import AzureStorageMountsAddEditAdvanced from './AzureStorageMountsAddEditAdvanced';
+import { Formik, FormikProps, Field } from 'formik';
+import TextField from '../../../../components/form-controls/TextField';
 
 export interface AzureStorageMountsAddEditProps {
   updateAzureStorageMount: (item: FormAzureStorageMounts) => any;
@@ -28,120 +29,103 @@ export type AzureStorageMountsAddEditPropsCombined = AzureStorageMountsAddEditPr
   InjectedTranslateProps &
   AzureStorageMountsAddEditStateProps;
 const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombined> = props => {
-  const { updateAzureStorageMount, t, closeBlade, azureStorageMount, otherAzureStorageMounts, storageAccounts } = props;
-  const [currentAzureStorageMount, setCurrentAzureStorageMount] = useState(azureStorageMount);
+  const { t, closeBlade, storageAccounts, azureStorageMount, updateAzureStorageMount } = props;
+  // const [currentAzureStorageMount, setCurrentAzureStorageMount] = useState(azureStorageMount);
   const [confiurationOption, setConfigurationOption] = useState('basic');
   const [basicDisabled, setBasicDisabled] = useState(false);
-  const [nameError, setNameError] = useState('');
-
-  const validateName = (value: string) => {
-    return otherAzureStorageMounts.filter(v => v.name === value).length >= 1 ? 'Azure Storage Mount names must be unique' : '';
-  };
-  const save = () => {
-    updateAzureStorageMount(currentAzureStorageMount);
-  };
 
   const cancel = () => {
     closeBlade();
-  };
-
-  const actionBarPrimaryButtonProps = {
-    id: 'save',
-    title: t('save'),
-    onClick: save,
-    disable: false,
-  };
-
-  const actionBarSecondaryButtonProps = {
-    id: 'cancel',
-    title: t('cancel'),
-    onClick: cancel,
-    disable: false,
-  };
-  const updateAzureStorageMountName = (e: any, name: string) => {
-    const error = validateName(name);
-    setNameError(error);
-    setCurrentAzureStorageMount({ ...currentAzureStorageMount, name });
   };
 
   const updateConfigurationOptions = (e: any, configOptions: IChoiceGroupOption) => {
     setConfigurationOption(configOptions.key);
   };
 
-  const updateMountPath = (e: any, mountPath: string) => {
-    setCurrentAzureStorageMount({ ...currentAzureStorageMount, mountPath });
-  };
-
   useEffect(() => {
     if (storageAccounts.data.value.length === 0) {
       setConfigurationOption('advanced');
       setBasicDisabled(true);
-    } else if (
-      currentAzureStorageMount.accountName &&
-      !storageAccounts.data.value.find(x => x.name === currentAzureStorageMount.accountName)
-    ) {
+    } else if (azureStorageMount.accountName && !storageAccounts.data.value.find(x => x.name === azureStorageMount.accountName)) {
       setConfigurationOption('advanced');
     }
   }, []);
   return (
-    <form>
-      <TextField
-        label={t('_name')}
-        id="azure-storage-mounts-name"
-        value={currentAzureStorageMount.name}
-        onChange={updateAzureStorageMountName}
-        styles={{
-          root: formElementStyle,
-        }}
-        errorMessage={nameError}
-        autoFocus
-      />
-      <ChoiceGroup
-        id="azure-storage-mounts-name"
-        selectedKey={confiurationOption}
-        label="Configuration Options"
-        options={[
-          {
-            key: 'basic',
-            text: t('basic'),
-            disabled: basicDisabled,
-          },
-          {
-            key: 'advanced',
-            text: t('advanced'),
-          },
-        ]}
-        onChange={updateConfigurationOptions}
-      />
-      {confiurationOption === 'basic' && (
-        <AzureStorageMountsAddEditBasic
-          {...props}
-          currentAzureStorageMount={currentAzureStorageMount}
-          setCurrentAzureStorageMount={setCurrentAzureStorageMount}
-        />
-      )}
-      {confiurationOption === 'advanced' && (
-        <AzureStorageMountsAddEditAdvanced
-          {...props}
-          currentAzureStorageMount={currentAzureStorageMount}
-          setCurrentAzureStorageMount={setCurrentAzureStorageMount}
-        />
-      )}
-      <TextField
-        label={t('mountPath')}
-        id="azure-storage-mounts-mount-path"
-        value={currentAzureStorageMount.mountPath}
-        onChange={updateMountPath}
-        styles={{
-          root: formElementStyle,
-        }}
-      />
-      <ActionBar
-        id="handler-mappings-edit-footer"
-        primaryButton={actionBarPrimaryButtonProps}
-        secondaryButton={actionBarSecondaryButtonProps}
-      />
-    </form>
+    <Formik
+      initialValues={{ ...azureStorageMount }}
+      onSubmit={values => {
+        updateAzureStorageMount(values);
+      }}
+      render={(formProps: FormikProps<FormAzureStorageMounts>) => {
+        const actionBarPrimaryButtonProps = {
+          id: 'save',
+          title: t('save'),
+          onClick: formProps.submitForm,
+          disable: false,
+        };
+
+        const actionBarSecondaryButtonProps = {
+          id: 'cancel',
+          title: t('cancel'),
+          onClick: cancel,
+          disable: false,
+        };
+
+        return (
+          <form>
+            <Field
+              name={'name'}
+              label={t('_name')}
+              component={TextField}
+              id={`azure-storage-mounts-name`}
+              ariaLabel={t('_name')}
+              errorMessage={formProps.errors && formProps.errors.name}
+              styles={{
+                root: formElementStyle,
+              }}
+              autoFocus
+              {...formProps}
+            />
+            <ChoiceGroup
+              id="azure-storage-mounts-name"
+              selectedKey={confiurationOption}
+              label="Configuration Options"
+              options={[
+                {
+                  key: 'basic',
+                  text: t('basic'),
+                  disabled: basicDisabled,
+                },
+                {
+                  key: 'advanced',
+                  text: t('advanced'),
+                },
+              ]}
+              onChange={updateConfigurationOptions}
+            />
+            {confiurationOption === 'basic' && <AzureStorageMountsAddEditBasic {...props} {...formProps} />}
+            {confiurationOption === 'advanced' && <AzureStorageMountsAddEditAdvanced {...props} {...formProps} />}
+            <Field
+              name={'mountPath'}
+              label={t('mountPath')}
+              component={TextField}
+              id={`azure-storage-mounts-path`}
+              ariaLabel={t('mountPath')}
+              errorMessage={formProps.errors && formProps.errors.mountPath}
+              styles={{
+                root: formElementStyle,
+              }}
+              {...formProps}
+            />
+            <ActionBar
+              id="handler-mappings-edit-footer"
+              primaryButton={actionBarPrimaryButtonProps}
+              secondaryButton={actionBarSecondaryButtonProps}
+            />
+          </form>
+        );
+      }}
+    />
   );
 };
 

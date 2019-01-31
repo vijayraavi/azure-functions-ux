@@ -1,16 +1,18 @@
 import React from 'react';
 import { AzureStorageMountsAddEditPropsCombined } from './AzureStorageMountsAddEdit';
-import { AzureStorageMountsAddEditBasicProps } from './AzureStorageMountsAddEditBasic';
 import { ChoiceGroup, TextField, IChoiceGroupOption } from 'office-ui-fabric-react';
 import { formElementStyle } from '../AppSettings.styles';
+import { FormikProps } from 'formik';
+import { FormAzureStorageMounts } from '../AppSettings.types';
+import { StorageType } from '../../../../modules/site/config/azureStorageAccounts/reducer';
 export interface AzureStorageMountsAddEditAdvancedProps {}
-const AzureStorageMountsAddEditAdvanced: React.FC<AzureStorageMountsAddEditPropsCombined & AzureStorageMountsAddEditBasicProps> = props => {
-  const { currentAzureStorageMount, t, setCurrentAzureStorageMount } = props;
+const AzureStorageMountsAddEditAdvanced: React.FC<FormikProps<FormAzureStorageMounts> & AzureStorageMountsAddEditPropsCombined> = props => {
+  const { t } = props;
   const onAccountChange = (e: any, accountName: string) => {
-    setCurrentAzureStorageMount({ ...currentAzureStorageMount, accountName });
+    props.setValues({ ...props.values, accountName });
   };
   const onTypeChange = (e: any, typeOption: IChoiceGroupOption) => {
-    setCurrentAzureStorageMount({ ...currentAzureStorageMount, type: typeOption.key });
+    props.setValues({ ...props.values, type: typeOption.key as StorageType });
   };
 
   return (
@@ -18,7 +20,7 @@ const AzureStorageMountsAddEditAdvanced: React.FC<AzureStorageMountsAddEditProps
       <TextField
         label={t('storageAccount')}
         id="azure-storage-mounts-mount-path"
-        value={currentAzureStorageMount.accountName}
+        value={props.values.accountName}
         onChange={onAccountChange}
         styles={{
           root: formElementStyle,
@@ -26,7 +28,7 @@ const AzureStorageMountsAddEditAdvanced: React.FC<AzureStorageMountsAddEditProps
       />
       <ChoiceGroup
         id="azure-storage-mounts-name"
-        selectedKey={currentAzureStorageMount.type}
+        selectedKey={props.values.type}
         label="Storage Type"
         options={[
           {
@@ -43,7 +45,7 @@ const AzureStorageMountsAddEditAdvanced: React.FC<AzureStorageMountsAddEditProps
       <TextField
         label={t('shareName')}
         id="azure-storage-mounts-share-name"
-        value={currentAzureStorageMount.shareName}
+        value={props.values.shareName}
         onChange={onAccountChange}
         styles={{
           root: formElementStyle,
@@ -52,7 +54,7 @@ const AzureStorageMountsAddEditAdvanced: React.FC<AzureStorageMountsAddEditProps
       <TextField
         label={t('accessKey')}
         id="azure-storage-mounts-access-key"
-        value={currentAzureStorageMount.accessKey}
+        value={props.values.accessKey}
         onChange={onAccountChange}
         styles={{
           root: formElementStyle,
