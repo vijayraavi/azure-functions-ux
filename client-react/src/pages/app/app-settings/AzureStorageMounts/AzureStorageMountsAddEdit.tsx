@@ -29,13 +29,21 @@ export type AzureStorageMountsAddEditPropsCombined = AzureStorageMountsAddEditPr
   InjectedTranslateProps &
   AzureStorageMountsAddEditStateProps;
 const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombined> = props => {
-  const { t, closeBlade, storageAccounts, azureStorageMount, updateAzureStorageMount } = props;
-  // const [currentAzureStorageMount, setCurrentAzureStorageMount] = useState(azureStorageMount);
+  const { t, closeBlade, storageAccounts, otherAzureStorageMounts, azureStorageMount, updateAzureStorageMount } = props;
   const [confiurationOption, setConfigurationOption] = useState('basic');
   const [basicDisabled, setBasicDisabled] = useState(false);
-
+  const [initialName] = useState(azureStorageMount.name);
   const cancel = () => {
     closeBlade();
+  };
+
+  const validateAppSettingName = (value: string) => {
+    if (initialName && value === initialName) {
+      return '';
+    }
+    return otherAzureStorageMounts.filter(v => v.name.toLowerCase() === value.toLowerCase()).length >= 1
+      ? 'Azure storage mount names must be unique'
+      : '';
   };
 
   const updateConfigurationOptions = (e: any, configOptions: IChoiceGroupOption) => {
@@ -61,7 +69,7 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
           id: 'save',
           title: t('save'),
           onClick: formProps.submitForm,
-          disable: false,
+          disable: !formProps.isValid || !formProps.dirty || formProps.isValidating,
         };
 
         const actionBarSecondaryButtonProps = {
@@ -70,7 +78,6 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
           onClick: cancel,
           disable: false,
         };
-
         return (
           <form>
             <Field
@@ -82,6 +89,12 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
               errorMessage={formProps.errors && formProps.errors.name}
               styles={{
                 root: formElementStyle,
+              }}
+              validate={val => {
+                const error = validateAppSettingName(val);
+                if (error) {
+                  throw error;
+                }
               }}
               autoFocus
               {...formProps}
@@ -121,6 +134,7 @@ const AzureStorageMountsAddEdit: React.SFC<AzureStorageMountsAddEditPropsCombine
               id="handler-mappings-edit-footer"
               primaryButton={actionBarPrimaryButtonProps}
               secondaryButton={actionBarSecondaryButtonProps}
+              validating={formProps.isValidating}
             />
           </form>
         );

@@ -1,34 +1,34 @@
 import React from 'react';
 import { AzureStorageMountsAddEditPropsCombined } from './AzureStorageMountsAddEdit';
-import { ChoiceGroup, TextField, IChoiceGroupOption } from 'office-ui-fabric-react';
 import { formElementStyle } from '../AppSettings.styles';
-import { FormikProps } from 'formik';
+import { FormikProps, Field } from 'formik';
 import { FormAzureStorageMounts } from '../AppSettings.types';
-import { StorageType } from '../../../../modules/site/config/azureStorageAccounts/reducer';
+import TextField from '../../../../components/form-controls/TextField';
+import RadioButton from '../../../../components/form-controls/RadioButton';
 export interface AzureStorageMountsAddEditAdvancedProps {}
 const AzureStorageMountsAddEditAdvanced: React.FC<FormikProps<FormAzureStorageMounts> & AzureStorageMountsAddEditPropsCombined> = props => {
-  const { t } = props;
-  const onAccountChange = (e: any, accountName: string) => {
-    props.setValues({ ...props.values, accountName });
-  };
-  const onTypeChange = (e: any, typeOption: IChoiceGroupOption) => {
-    props.setValues({ ...props.values, type: typeOption.key as StorageType });
-  };
+  const { t, errors } = props;
 
   return (
     <>
-      <TextField
+      <Field
+        component={TextField}
+        name="accountName"
         label={t('storageAccount')}
-        id="azure-storage-mounts-mount-path"
-        value={props.values.accountName}
-        onChange={onAccountChange}
+        id="azure-storage-mounts-account-name"
+        errorMessage={errors.accountName}
         styles={{
           root: formElementStyle,
         }}
+        validate={(val: string) => {
+          if (val !== val.toLowerCase()) {
+            throw 'Storage account name must be lower case';
+          }
+        }}
       />
-      <ChoiceGroup
-        id="azure-storage-mounts-name"
-        selectedKey={props.values.type}
+      <Field
+        component={RadioButton}
+        name="type"
         label="Storage Type"
         options={[
           {
@@ -40,25 +40,31 @@ const AzureStorageMountsAddEditAdvanced: React.FC<FormikProps<FormAzureStorageMo
             text: t('azureFiles'),
           },
         ]}
-        onChange={onTypeChange}
       />
-      <TextField
+      <Field
+        component={TextField}
+        name="shareName"
         label={t('shareName')}
         id="azure-storage-mounts-share-name"
-        value={props.values.shareName}
-        onChange={onAccountChange}
         styles={{
           root: formElementStyle,
         }}
+        validate={(val: string) => {
+          if (val !== val.toLowerCase()) {
+            throw 'Storage account name must be lower case';
+          }
+        }}
+        errorMessage={errors.shareName}
       />
-      <TextField
+      <Field
+        component={TextField}
+        name="accessKey"
         label={t('accessKey')}
         id="azure-storage-mounts-access-key"
-        value={props.values.accessKey}
-        onChange={onAccountChange}
         styles={{
           root: formElementStyle,
         }}
+        errorMessage={errors.accessKey}
       />
     </>
   );

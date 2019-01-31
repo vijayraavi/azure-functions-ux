@@ -1,32 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { ComboBox, ChoiceGroup, IComboBoxOption, IChoiceGroupOption } from 'office-ui-fabric-react';
 import { FormAzureStorageMounts } from '../AppSettings.types';
 import { AzureStorageMountsAddEditPropsCombined } from './AzureStorageMountsAddEdit';
 import MakeArmCall from '../../../../modules/ArmHelper';
 import axios from 'axios';
 import { formElementStyle } from '../AppSettings.styles';
-import { FormikProps } from 'formik';
-import { StorageType } from '../../../../modules/site/config/azureStorageAccounts/reducer';
+import { FormikProps, Field } from 'formik';
+import ComboBox from '../../../../components/form-controls/ComboBox';
+import RadioButton from '../../../../components/form-controls/RadioButton';
 const AzureStorageMountsAddEditBasic: React.FC<FormikProps<FormAzureStorageMounts> & AzureStorageMountsAddEditPropsCombined> = props => {
-  const { t } = props;
+  const { t, errors } = props;
   const [accountSharesFiles, setAccountSharesFiles] = useState([]);
   const [accountSharesBlob, setAccountSharesBlob] = useState([]);
   const [sharesLoading, setSharesLoading] = useState(false);
   const [accountError, setAccountError] = useState('');
   const accountOptions = props.storageAccounts.data.value.map(val => ({ key: val.name, text: val.name }));
 
-  const onAccountChange = (e: any, accountName: IComboBoxOption) => {
-    props.setValues({ ...props.values, accountName: accountName.key as string });
-  };
   const setAccessKey = (accessKey: string) => {
     props.setValues({ ...props.values, accessKey });
-  };
-
-  const onAccountShareChange = (e: any, shareOption: IComboBoxOption) => {
-    props.setValues({ ...props.values, shareName: shareOption.key as string });
-  };
-  const onTypeChange = (e: any, typeOption: IChoiceGroupOption) => {
-    props.setValues({ ...props.values, type: typeOption.key as StorageType });
   };
   useEffect(
     () => {
@@ -77,21 +67,27 @@ const AzureStorageMountsAddEditBasic: React.FC<FormikProps<FormAzureStorageMount
 
   return (
     <>
-      <ComboBox
-        selectedKey={props.values.accountName}
+      <Field
+        component={ComboBox}
+        name="accountName"
         options={accountOptions}
         label="Storage Accounts"
         allowFreeform
         autoComplete="on"
-        onChange={onAccountChange}
         styles={{
           root: formElementStyle,
         }}
-        errorMessage={accountError}
+        errorMessage={errors.accountName}
+        validate={() => {
+          if (accountError) {
+            throw accountError;
+          }
+        }}
       />
-      <ChoiceGroup
+      <Field
+        component={RadioButton}
+        name="type"
         id="azure-storage-mounts-name"
-        selectedKey={props.values.type}
         label="Storage Type"
         options={[
           {
@@ -105,19 +101,31 @@ const AzureStorageMountsAddEditBasic: React.FC<FormikProps<FormAzureStorageMount
             disabled: filesContainerOptions.length === 0,
           },
         ]}
-        onChange={onTypeChange}
       />
-      <ComboBox
-        selectedKey={props.values.shareName}
+      <Field
+        component={ComboBox}
+        name="shareName"
         options={props.values.type === 'AzureBlob' ? blobContainerOptions : filesContainerOptions}
         label="Storage Container"
         allowFreeform
         autoComplete="on"
-        onChange={onAccountShareChange}
         placeholder={sharesLoading ? 'Loading' : 'Select an Option'}
         styles={{
           root: formElementStyle,
         }}
+        validate={val => {
+          if (!val) {
+            throw 'required';
+          }
+          const foundVal =
+            props.values.type === 'AzureBlob'
+              ? blobContainerOptions.find(x => x.key === val)
+              : filesContainerOptions.find(x => x.key === val);
+          if (!foundVal) {
+            throw 'required';
+          }
+        }}
+        errorMessage={errors.shareName}
       />
     </>
   );
